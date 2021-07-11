@@ -18,13 +18,39 @@ OBS: Todas as imagens de exemplo (Visualizações) são apenas para referencias,
 ---
 ## Nível Básico
 
-Dados: https://mobileapps.saude.gov.br/esus-vepi/files/unAFkcaNDeXajurGB7LChj8SgQYS2ptm/04bd3419b22b9cc5c6efac2c6528100d_HIST_PAINEL_COVIDBR_06jul2021.rar
+(Dados)[ https://mobileapps.saude.gov.br/esus-vepi/files/unAFkcaNDeXajurGB7LChj8SgQYS2ptm/04bd3419b22b9cc5c6efac2c6528100d_HIST_PAINEL_COVIDBR_06jul2021.rar]
 
 Referência das visualizações:
   - Site: https://covid.saude.gov.br
   - Guia do site: Painel Geral
 
+---
 1. Enviar os dados para o hdfs
+   
+   Essa parte do projeto foi feito utilizando comunicação do Jupyter Notebook com o namenode através da porta localhost:8889 e linguagem Python.
+   - Instalar módulo de Python para leitura de arquivos .RAR
+
+```
+! pip install rarfile
+
+```
+
+   - Instalar módulo wget para baixar arquivo de dados da internet
+
+```
+! pip install wget
+```
+
+   - Download através do script em Python
+
+```python
+import wget
+
+url =  "https://mobileapps.saude.gov.br/esus-vepi/files/unAFkcaNDeXajurGB7LChj8SgQYS2ptm/04bd3419b22b9cc5c6efac2c6528100d_HIST_PAINEL_COVIDBR_06jul2021.rar"
+
+dados = wget.download( url , "dados.rar")
+```
+
 2. Otimizar todos os dados do hdfs para uma tabela Hive particionada por município.
 3. Criar as 3 vizualizações pelo Spark com os dados enviados para o HDFS:
 
