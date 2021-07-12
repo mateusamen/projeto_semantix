@@ -18,40 +18,130 @@ OBS: Todas as imagens de exemplo (Visualizações) são apenas para referencias,
 ---
 ## Nível Básico
 
-(Dados)[ https://mobileapps.saude.gov.br/esus-vepi/files/unAFkcaNDeXajurGB7LChj8SgQYS2ptm/04bd3419b22b9cc5c6efac2c6528100d_HIST_PAINEL_COVIDBR_06jul2021.rar]
+Dados:  https://mobileapps.saude.gov.br/esus-vepi/files/unAFkcaNDeXajurGB7LChj8SgQYS2ptm/04bd3419b22b9cc5c6efac2c6528100d_HIST_PAINEL_COVIDBR_06jul2021.rar
 
 Referência das visualizações:
   - Site: https://covid.saude.gov.br
   - Guia do site: Painel Geral
 
 ---
+
+*Os foi realizado utilizando Docker e Docker-Compose através do WSL2*
+Primeiramente, entrar na pasta onde estão instalados os arquivos docker-compose e inicializar os serviços através do ```docker-compose up -d```
+### ps: em algum momento dar cat para entender tabela
+
+Os arquivos .yml estão disponíveis em : XXXXX
+
 1. Enviar os dados para o hdfs
+
+1.1 - Primeiramente é feito download dos dados e posterior extração dos arquivos em pasta local.
    
-   Essa parte do projeto foi feito utilizando comunicação do Jupyter Notebook com o namenode através da porta localhost:8889 e linguagem Python.
-   - Instalar módulo de Python para leitura de arquivos .RAR
+1.2 - Utilizar ```docker cp``` para fazer a cópia dos arquivos para o namenome, através do segunite script:
+   
+   ```
+   docker cp HIST_PAINEL_COVIDBR_2020_Parte1_06jul2021.csv namenode:/
+   ```
+   ```
+   docker cp HIST_PAINEL_COVIDBR_2020_Parte2_06jul2021.csv namenode:/
+   ```
+   ```
+   docker cp HIST_PAINEL_COVIDBR_2021_Parte1_06jul2021.csv namenode:/
+   ```
+   ```
+   docker cp HIST_PAINEL_COVIDBR_2021_Parte2_06jul2021.csv namenode:/
+   ```
+   
+1.3 - Entrar no container namenode ```docker exec -it namenode bash``` e listar os arquivos através do ```ls```
 
-```
-! pip install rarfile
+![foto03_projeto_dev](https://user-images.githubusercontent.com/62483710/125337812-ceef0c80-e325-11eb-9aea-ef1feb4877b4.PNG)
 
-```
+1.4 -De dentro do namenode, criar a seguinte estrutura de pasta ** hdfs:/user/projeto/semantix ** através do comando ```hdfs dfs -mkdir user/projeto/semantix ``` e enviar os arquivos para o HDFS através dos comandos:
+   
+   ```
+   hdfs dfs -put HIST_PAINEL_COVIDBR_2020_Parte1_06jul2021.csv /user/projeto/semantix
+   ```
+   ```
+   hdfs dfs -put HIST_PAINEL_COVIDBR_2020_Parte2_06jul2021.csv /user/projeto/semantix
+   ```
+   ```
+   hdfs dfs -put HIST_PAINEL_COVIDBR_2021_Parte1_06jul2021.csv /user/projeto/semantix
+   ```
+   ```
+   hdfs dfs -put HIST_PAINEL_COVIDBR_2021_Parte2_06jul2021.csv /user/projeto/semantix
+   ```
+   
+1.5 - Conferir se arquivos foram devidamente salvos no HDFS através de ``` hdfs dfs -ls /user/projeto/semantix```
+   
+   ![foto04_projeto_dev](https://user-images.githubusercontent.com/62483710/125338881-1e820800-e327-11eb-9d54-ade20e33fa21.PNG)
 
-   - Instalar módulo wget para baixar arquivo de dados da internet
-
-```
-! pip install wget
-```
-
-   - Download através do script em Python
-
-```python
-import wget
-
-url =  "https://mobileapps.saude.gov.br/esus-vepi/files/unAFkcaNDeXajurGB7LChj8SgQYS2ptm/04bd3419b22b9cc5c6efac2c6528100d_HIST_PAINEL_COVIDBR_06jul2021.rar"
-
-dados = wget.download( url , "dados.rar")
-```
-
+---       
 2. Otimizar todos os dados do hdfs para uma tabela Hive particionada por município.
+
+Ainda no container do namenode, dar um ```hdfs dfs -cat <file> | head ``` para visualizar o formato do arquivo e seu cabeçalho.
+
+```
+hdfs dfs -cat /user/projeto/semantix/HIST_PAINEL_COVIDBR_2021_Parte1_06jul2021.csv | head
+```
+
+![foto07_projeto](https://user-images.githubusercontent.com/62483710/125356531-b6d6b780-e33c-11eb-8bfd-50af6c0c6954.PNG)
+
+
+2.1 - Sair do container namenode através do comando *Ctrl+d* e entrar no container Hiver-Server através do comando:
+
+```
+docker exec -it hive-server bash
+```
+
+2.2 - Conectar-se ao Hive e acessar ao cliente beeline para se conectar ao HiveServer2 através da porta localhost:10000 através do script:
+
+```
+beeline -u jdbc:hive2://localhost:10000
+```
+
+![foto05_projeto](https://user-images.githubusercontent.com/62483710/125340327-bb917080-e328-11eb-9aa9-26a9b4864d26.PNG)
+
+2.3 - Criar banco de dados *projeto_semantix*
+
+```
+create database projeto_semantix;
+```
+
+mostrar banco de dados criado: script ```show databases;```
+
+![foto06_projeto_hive](https://user-images.githubusercontent.com/62483710/125344000-204eca00-e32d-11eb-99f4-fd51e799e650.PNG)
+
+2.4 - Criar tabela dados_covid para receber dados do HDFS
+
+```
+CREATE TABLE dados_covid(regiao string,
+                         estado string,
+                         municipio string,
+                         cod_uf int,
+                         cod_mun int,
+                         cod_regiao_saude int,
+                         nome_regiao_saude string,
+                         data date,
+                         semana_epi int,
+                         populacaoTCU2019 int,
+                         casos_acumulados int,
+                         casos_novos int,
+                         obitos_acumulado int,
+                         obitos_novos int,
+                         recuperados_novos int,
+                         em_acompanhamento_novos int,
+                         interior_metropolitana string)
+                         row format delimited
+                         fields terminated by ';'
+                         lines terminated by '\n'
+                         tblproperties("skip.header.line.count"="1");
+```
+
+2.5 - Adicionar dados do HDFS na tabela dados_covid:
+
+```
+load data inpath '/user/projeto/semantix' into table dados_covid;
+```
+
 3. Criar as 3 vizualizações pelo Spark com os dados enviados para o HDFS:
 
 ![foto01_projeto](https://user-images.githubusercontent.com/62483710/125175523-287afe00-e1a3-11eb-8aea-4c59b9d79272.PNG)
