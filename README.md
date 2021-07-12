@@ -32,11 +32,11 @@ Primeiramente, entrar na pasta onde estão instalados os arquivos docker-compose
 
 Os arquivos .yml estão disponíveis em : XXXXX
 
-1. Enviar os dados para o hdfs
+### 1. Enviar os dados para o hdfs
 
-1.1 - Primeiramente é feito download dos dados e posterior extração dos arquivos em pasta local.
+#### 1.1 - Primeiramente é feito download dos dados e posterior extração dos arquivos em pasta local.
    
-1.2 - Utilizar ```docker cp``` para fazer a cópia dos arquivos para o namenome, através do segunite script:
+#### 1.2 - Utilizar ```docker cp``` para fazer a cópia dos arquivos para o namenome, através do segunite script:
    
    ```
    docker cp HIST_PAINEL_COVIDBR_2020_Parte1_06jul2021.csv namenode:/
@@ -51,11 +51,11 @@ Os arquivos .yml estão disponíveis em : XXXXX
    docker cp HIST_PAINEL_COVIDBR_2021_Parte2_06jul2021.csv namenode:/
    ```
    
-1.3 - Entrar no container namenode ```docker exec -it namenode bash``` e listar os arquivos através do ```ls```
+#### 1.3 - Entrar no container namenode ```docker exec -it namenode bash``` e listar os arquivos através do ```ls```
 
 ![foto03_projeto_dev](https://user-images.githubusercontent.com/62483710/125337812-ceef0c80-e325-11eb-9aea-ef1feb4877b4.PNG)
 
-1.4 -De dentro do namenode, criar a seguinte estrutura de pasta ** hdfs:/user/projeto/semantix ** através do comando ```hdfs dfs -mkdir user/projeto/semantix ``` e enviar os arquivos para o HDFS através dos comandos:
+#### 1.4 -De dentro do namenode, criar a seguinte estrutura de pasta ** hdfs:/user/projeto/semantix ** através do comando ```hdfs dfs -mkdir user/projeto/semantix ``` e enviar os arquivos para o HDFS através dos comandos:
    
    ```
    hdfs dfs -put HIST_PAINEL_COVIDBR_2020_Parte1_06jul2021.csv /user/projeto/semantix
@@ -70,12 +70,12 @@ Os arquivos .yml estão disponíveis em : XXXXX
    hdfs dfs -put HIST_PAINEL_COVIDBR_2021_Parte2_06jul2021.csv /user/projeto/semantix
    ```
    
-1.5 - Conferir se arquivos foram devidamente salvos no HDFS através de ``` hdfs dfs -ls /user/projeto/semantix```
+#### 1.5 - Conferir se arquivos foram devidamente salvos no HDFS através de ``` hdfs dfs -ls /user/projeto/semantix```
    
    ![foto04_projeto_dev](https://user-images.githubusercontent.com/62483710/125338881-1e820800-e327-11eb-9d54-ade20e33fa21.PNG)
 
 ---       
-2. Otimizar todos os dados do hdfs para uma tabela Hive particionada por município.
+### 2. Otimizar todos os dados do hdfs para uma tabela Hive particionada por município.
 
 Ainda no container do namenode, dar um ```hdfs dfs -cat <file> | head ``` para visualizar o formato do arquivo e seu cabeçalho.
 
@@ -86,13 +86,13 @@ hdfs dfs -cat /user/projeto/semantix/HIST_PAINEL_COVIDBR_2021_Parte1_06jul2021.c
 ![foto07_projeto](https://user-images.githubusercontent.com/62483710/125356531-b6d6b780-e33c-11eb-8bfd-50af6c0c6954.PNG)
 
 
-2.1 - Sair do container namenode através do comando *Ctrl+d* e entrar no container Hiver-Server através do comando:
+#### 2.1 - Sair do container namenode através do comando *Ctrl+d* e entrar no container Hiver-Server através do comando:
 
 ```
 docker exec -it hive-server bash
 ```
 
-2.2 - Conectar-se ao Hive e acessar ao cliente beeline para se conectar ao HiveServer2 através da porta localhost:10000 através do script:
+#### 2.2 - Conectar-se ao Hive e acessar ao cliente beeline para se conectar ao HiveServer2 através da porta localhost:10000 através do script:
 
 ```
 beeline -u jdbc:hive2://localhost:10000
@@ -100,7 +100,7 @@ beeline -u jdbc:hive2://localhost:10000
 
 ![foto05_projeto](https://user-images.githubusercontent.com/62483710/125340327-bb917080-e328-11eb-9aa9-26a9b4864d26.PNG)
 
-2.3 - Criar banco de dados *projeto_semantix*
+#### 2.3 - Criar banco de dados *projeto_semantix*
 
 ```
 create database projeto_semantix;
@@ -110,7 +110,7 @@ mostrar banco de dados criado: script ```show databases;```
 
 ![foto06_projeto_hive](https://user-images.githubusercontent.com/62483710/125344000-204eca00-e32d-11eb-99f4-fd51e799e650.PNG)
 
-2.4 - Criar tabela dados_covid para receber dados do HDFS
+#### 2.4 - Criar tabela dados_covid para receber dados do HDFS
 
 ```
 CREATE TABLE dados_covid(regiao string,
@@ -136,7 +136,7 @@ CREATE TABLE dados_covid(regiao string,
                          tblproperties("skip.header.line.count"="1");
 ```
 
-2.5 - Adicionar dados do HDFS na tabela dados_covid:
+#### 2.5 - Adicionar dados do HDFS na tabela dados_covid:
 
 ```
 load data inpath '/user/projeto/semantix' into table dados_covid;
