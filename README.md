@@ -26,9 +26,9 @@ Referência das visualizações:
 
 ---
 
-*Os foi realizado utilizando Docker e Docker-Compose através do WSL2*
+*O projeto foi realizado utilizando Docker e Docker-Compose através do WSL2*
+
 Primeiramente, entrar na pasta onde estão instalados os arquivos docker-compose e inicializar os serviços através do ```docker-compose up -d```
-### ps: em algum momento dar cat para entender tabela
 
 Os arquivos .yml estão disponíveis em : XXXXX
 
