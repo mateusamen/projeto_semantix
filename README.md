@@ -136,7 +136,7 @@ CREATE TABLE dados_covid(regiao string,
                          tblproperties("skip.header.line.count"="1");
 ```
 
-#### 2.5 - Adicionar dados do HDFS na tabela dados_covid:
+#### 2.5 - Carregar dados do HDFS na tabela dados_covid:
 
 ```
 load data inpath '/user/projeto/semantix' into table dados_covid;
