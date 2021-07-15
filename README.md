@@ -141,8 +141,47 @@ CREATE TABLE dados_covid(regiao string,
 ```
 load data inpath '/user/projeto/semantix' into table dados_covid;
 ```
-
+---
 3. Criar as 3 vizualizações pelo Spark com os dados enviados para o HDFS:
+
+Utilizando o Jupyter Notebook através da porta localhost: 8889.
+
+3.1 - Listar arquivos no hive/warehouse
+
+```
+! hdfs dfs -ls /user/hive/warehouse/
+```
+
+![foto08_spark](https://user-images.githubusercontent.com/62483710/125826064-3a052972-b69a-490e-8d61-2f3ee61d2d7e.PNG)
+
+
+3.2 - Ler a tabela Hive 
+
+```pyspark
+tabela = spark.read.table("dados_covid")
+```
+
+3.3 - Visualizar schema
+
+```pyspark
+tabela.printSchema
+```
+
+![foto09_spark](https://user-images.githubusercontent.com/62483710/125826115-0e551ebe-ed62-456f-9ea9-17bda2a5f99c.PNG)
+
+3.4 - Utilizando *spark.sql* criar variáveis que salvam os indicadores:
+
+```pyspark
+total_casos_acumulados = spark.sql("select max (casos_acumulados) as casos_acumulados from dados_covid group by cod_mun order by casos_acumulados desc limit 1").show()
+total_casos_recuperados = spark.sql("select max (recuperados_novos) as novos_recuperados from dados_covid group by cod_mun order by novos_recuperados desc limit 1").show()
+total_obitos = spark.sql("select max(obitos_acumulado) as obitos_acumulados from dados_covid group by cod_mun order by obitos_acumulados desc limit 1").show()
+casos_novos = spark.sql("select max(casos_novos) as novos_casos from dados_covid where data = ('2021-07-06') group by cod_mun order by novos_casos desc limit 1").show()
+obitos_novos = spark.sql("select max(obitos_novos) as novos_obitos from dados_covid where data = ('2021-07-06') group by cod_mun order by novos_obitos desc limit 1").show()
+
+```
+![FOTO11_SPARK](https://user-images.githubusercontent.com/62483710/125826145-20c38ebf-6fb4-4c27-bc95-2f5f4f6c2ed7.PNG)
+![FOTO10_SPARK](https://user-images.githubusercontent.com/62483710/125826154-29f995a4-7c35-4a94-b4d0-e8f07e313dac.PNG)
+
 
 ![foto01_projeto](https://user-images.githubusercontent.com/62483710/125175523-287afe00-e1a3-11eb-8aea-4c59b9d79272.PNG)
 
