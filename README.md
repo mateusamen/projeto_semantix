@@ -142,7 +142,7 @@ CREATE TABLE dados_covid(regiao string,
 load data inpath '/user/projeto/semantix' into table dados_covid;
 ```
 ---
-3. Criar as 3 vizualizações pelo Spark com os dados enviados para o HDFS:
+### 3. Criar as 3 vizualizações pelo Spark com os dados enviados para o HDFS:
 
 Utilizando o Jupyter Notebook através da porta localhost: 8889.
 
@@ -169,23 +169,45 @@ tabela.printSchema
 
 ![foto09_spark](https://user-images.githubusercontent.com/62483710/125826115-0e551ebe-ed62-456f-9ea9-17bda2a5f99c.PNG)
 
-3.4 - Utilizando *spark.sql* criar variáveis que salvam os indicadores:
+3.4.1 - Utilizando *spark.sql* criar variáveis que salvam os indicadores:
 
 ```pyspark
-total_casos_acumulados = spark.sql("select max (casos_acumulados) as casos_acumulados from dados_covid group by cod_mun order by casos_acumulados desc limit 1").show()
-total_casos_recuperados = spark.sql("select max (recuperados_novos) as novos_recuperados from dados_covid group by cod_mun order by novos_recuperados desc limit 1").show()
-total_obitos = spark.sql("select max(obitos_acumulado) as obitos_acumulados from dados_covid group by cod_mun order by obitos_acumulados desc limit 1").show()
-casos_novos = spark.sql("select max(casos_novos) as novos_casos from dados_covid where data = ('2021-07-06') group by cod_mun order by novos_casos desc limit 1").show()
-obitos_novos = spark.sql("select max(obitos_novos) as novos_obitos from dados_covid where data = ('2021-07-06') group by cod_mun order by novos_obitos desc limit 1").show()
+### Criação das querys
+
+total_casos_recuperados = spark.sql("select MAX (recuperados_novos) as Casos_Recuperados from dados_covid").show()
+casos_em_acompanhamento = spark.sql("select LAST (em_acompanhamento_novos) as Em_Acompanhamento from dados_covid WHERE em_acompanhamento_novos IS NOT NULL").show()
+
+total_casos_acumulados = spark.sql("select MAX (casos_acumulados) as Acumulado from dados_covid ").show()
+casos_novos = spark.sql("select MAX (casos_novos) as Casos_novos from dados_covid where data = ('2021-07-06')").show()
+incidencia = spark.sql("SELECT ROUND(((MAX(casos_acumulados) / MAX(populacaotcu2019))*100000),1) as incidencia from dados_covid where data = ('2021-07-06')").show()
+
+###Calculo incidencia (casos confirmados * 1.000.000) / população.
+###Calculo letalidade (mortes totais/casos totais)
+###Calculo mortalidade (mortes totais/população)
+
+total_obitos_acumulados = spark.sql("select MAX (obitos_acumulado) as Obito_acumulado from dados_covid ").show()
+obitos_novos = spark.sql("select MAX (obitos_novos) as Obitos_novos from dados_covid where data = ('2021-07-06')").show()
+letalidade = spark.sql("SELECT ROUND(((MAX(obitos_acumulado) / MAX(casos_acumulados))*100),1) as letalidade from dados_covid").show()
+mortalidade = spark.sql("SELECT ROUND(((MAX(obitos_acumulado) / MAX(populacaotcu2019))*100000),1) as mortalidade from dados_covid").show()
+
+
+#populacao = spark.sql("select MAX (populacaotcu2019) as populacao from dados_covid where data = ('2021-07-06')").show()
 
 ```
-![FOTO11_SPARK](https://user-images.githubusercontent.com/62483710/125826145-20c38ebf-6fb4-4c27-bc95-2f5f4f6c2ed7.PNG)
-![FOTO10_SPARK](https://user-images.githubusercontent.com/62483710/125826154-29f995a4-7c35-4a94-b4d0-e8f07e313dac.PNG)
+![indic_03](https://user-images.githubusercontent.com/62483710/126370889-bb5e36bf-e27c-4db4-bd89-7642cd12a3d8.PNG)
+![indic_01](https://user-images.githubusercontent.com/62483710/126370891-0f6f5b34-caf1-469e-9e91-97c98ab4db7d.PNG)
+![indic_02](https://user-images.githubusercontent.com/62483710/126370895-45b5970f-977f-47bf-aa7f-56a54c73f1d2.PNG)
+
+3.4.2 - Criação das views:
+
 
 
 ![foto01_projeto](https://user-images.githubusercontent.com/62483710/125175523-287afe00-e1a3-11eb-8aea-4c59b9d79272.PNG)
 
 4. Salvar a primeira visualização como tabela Hive
+
+
+
 5. Salvar a segunda visualização com formato parquet e compressão snappy
 6. Salvar a terceira visualização em um tópico no Kafka
 7. Criar a visualização pelo Spark com os dados enviados para o HDFS:
