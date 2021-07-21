@@ -164,10 +164,11 @@ tabela = spark.read.table("dados_covid")
 3.3 - Visualizar schema
 
 ```pyspark
-tabela.printSchema
+tabela.printSchema()
 ```
 
-![foto09_spark](https://user-images.githubusercontent.com/62483710/125826115-0e551ebe-ed62-456f-9ea9-17bda2a5f99c.PNG)
+![SCHEMA](https://user-images.githubusercontent.com/62483710/126519678-cc8c8413-8358-4222-8db6-d82738111139.PNG)
+
 
 3.4.1 - Utilizando *spark.sql* criar variáveis que salvam os indicadores:
 
@@ -200,6 +201,27 @@ mortalidade = spark.sql("SELECT ROUND(((MAX(obitos_acumulado) / MAX(populacaotcu
 
 3.4.2 - Criação das views:
 
+Criação das views
+
+```pyspark
+spark.sql("use projeto_semantix")
+
+VIEW_01 = spark.sql("ALTER VIEW Casos_Recuperados AS select 1, MAX (recuperados_novos) as total_casos_recuperados from dados_covid UNION select 2, MAX (em_acompanhamento_novos) as Em_Acompanhamento from dados_covid WHERE data = ('2021-07-06')")
+
+VIEW_02 = spark.sql("ALTER VIEW Casos_confirmados AS select 1, (MAX (casos_acumulados)) as casos_confirmados from dados_covid UNION select 2, MAX (casos_novos) as Casos_novos from dados_covid where data = ('2021-07-06') UNION SELECT 3, ROUND(((MAX(casos_acumulados) / MAX(populacaotcu2019))*100000),1) as incidencia from dados_covid where data = ('2021-07-06')")
+
+VIEW_ = spark.sql("ALTER VIEW Obitos_confirmados AS select 1, MAX (obitos_acumulado) as Obitos_confirmados from dados_covid UNION select 2, MAX (obitos_novos) as Obitos_novos from dados_covid where data = ('2021-07-06') UNION SELECT 3, ROUND(((MAX(obitos_acumulado) / MAX(casos_acumulados))*100),1) as letalidade from dados_covid UNION SELECT 4, ROUND(((MAX(obitos_acumulado) / MAX(populacaotcu2019))*100000),1) as mortalidade from dados_covid")
+
+```
+3.4.3 Visualização das views:
+
+```pyspark
+spark.sql("SELECT * from Casos_Recuperados").show()
+spark.sql("SELECT * from Casos_confirmados").show()
+spark.sql("SELECT * from Obitos_confirmados").show()
+```
+
+![visu_views](https://user-images.githubusercontent.com/62483710/126524088-81f2e96a-6efa-4390-89b7-00d623b9a69c.PNG)
 
 
 ![foto01_projeto](https://user-images.githubusercontent.com/62483710/125175523-287afe00-e1a3-11eb-8aea-4c59b9d79272.PNG)
