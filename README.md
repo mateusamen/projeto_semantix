@@ -455,6 +455,6 @@ https://www.elastic.co/guide/en/elasticsearch/hadoop/current/configuration.html
 https://www.elastic.co/guide/en/elasticsearch/hadoop/current/install.html
 
 ---
-Bom projeto e estudos
+
 
 Desenvolvido por Rodrigo Rebouças
