@@ -55,7 +55,7 @@ Os arquivos .yml estão disponíveis em : XXXXX
 
 ![foto03_projeto_dev](https://user-images.githubusercontent.com/62483710/125337812-ceef0c80-e325-11eb-9aea-ef1feb4877b4.PNG)
 
-#### 1.4 -De dentro do namenode, criar a seguinte estrutura de pasta ** hdfs:/user/projeto/semantix ** através do comando ```hdfs dfs -mkdir user/projeto/semantix ``` e enviar os arquivos para o HDFS através dos comandos:
+#### 1.4 -De dentro do namenode, criar a seguinte estrutura de pasta **hdfs:/user/projeto/semantix** através do comando ```hdfs dfs -mkdir user/projeto/semantix ``` e enviar os arquivos para o HDFS através dos comandos:
    
    ```
    hdfs dfs -put HIST_PAINEL_COVIDBR_2020_Parte1_06jul2021.csv /user/projeto/semantix
